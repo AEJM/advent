@@ -1,242 +1,358 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<title>Calendario de AdvientAnita</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calendario de Adviento</title>
+
 <style>
-    body {
-        margin: 0;
-        font-family: 'Segoe UI', sans-serif;
-        background: #9b0505;
-        color: white;
-        overflow-x: hidden;
-    }
-
-    h1 {
-        text-align: center;
-        margin-top: 20px;
-        font-size: 2.5em;
-        color: white;
-        text-shadow: 2px 2px 5px black;
-    }
-
-    .calendar {
-        width: 90%;
-        margin: 20px auto;
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 12px;
-    }
-
-    .day {
-    background: rgba(255,255,255,0.15);
-    border: 2px solid white;
-    padding: 25px;
-    border-radius: 12px;
-    text-align: center;
-    font-size: 1.6em;
-    cursor: pointer;
-    transition: 0.2s;
-    backdrop-filter: blur(2px);
+:root {
+    --bg: #9b0505;
+    --card: rgba(255,255,255,0.15);
+    --text: #ffffff;
+    --white: #ffffff;
 }
 
-    .day.locked {
-        opacity: 0.35;
-        cursor: not-allowed;
-    }
+/* Reset */
+* { box-sizing: border-box; }
 
-    .day:hover:not(.locked) {
-        background: rgba(255,255,255,0.25);
-    }
+body {
+    margin: 0;
+    font-family: "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 20px;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
 
-    /* Modal */
-    .modal-bg {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.7);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-    }
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
 
+h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+p.lead {
+    margin: 0;
+    opacity: 0.9;
+}
+
+/* ===== GRID RESPONSIVA ===== */
+.grid {
+    display: grid;
+    gap: 14px;
+    margin-top: 20px;
+}
+
+/* Pantalla grande */
+@media (min-width: 901px) {
+    .grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+/* Tablet horizontal / vertical */
+@media (max-width: 900px) and (min-width: 601px) {
+    .grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Celular vertical */
+@media (max-width: 600px) {
+    .grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+}
+
+/* Cada día (cuadrado perfecto) */
+.day {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 14px;
+    aspect-ratio: 1/1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: .15s;
+    backdrop-filter: blur(4px);
+    padding: 6px;
+}
+
+/* Tamaños adaptados */
+.day .num {
+    font-size: clamp(20px, 5vw, 32px);
+    font-weight: 700;
+    text-shadow: 0 0 8px rgba(255,255,255,0.6);
+}
+
+.day .label {
+    font-size: clamp(11px, 2.5vw, 14px);
+    opacity: 0.9;
+    margin-top: 4px;
+}
+
+.day:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+.day.locked {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ===== MODAL ===== */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: .25s;
+    z-index: 20;
+}
+
+.overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal {
+    width: min(720px, 90%);
+    background: rgba(255,255,255,0.8); /* 80% transparencia */
+    color: #222;
+    border-radius: 16px;
+    padding: 22px;
+    display: flex;
+    flex-direction: row;
+    gap: 18px;
+}
+
+/* Modal responsivo */
+@media (max-width: 700px) {
     .modal {
-        background: white;
-        color: black;
-        padding: 25px;
-        max-width: 400px;
-        border-radius: 12px;
-        text-align: center;
+        flex-direction: column;
     }
+}
 
-    .close-btn {
-        background: #9b0505;
-        color: white;
-        padding: 10px 18px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        margin-top: 15px;
-    }
+.modal h2 {
+    margin: 0 0 8px 0;
+    color: #9b0505;
+}
 
-    .gift-img {
-        width: 110px;
-        margin: 10px auto;
-        display: block;
-    }
+.close {
+    background: #9b0505;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+}
 
-    /* Copos de nieve */
-    .snowflake {
-        position: fixed;
-        top: -10px;
-        color: white;
-        font-size: 1em;
-        user-select: none;
-        pointer-events: none;
-        animation: fall linear infinite;
-    }
+#modalGift {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-    @keyframes fall {
-        from { transform: translateY(-10px); }
-        to { transform: translateY(110vh); }
-    }
+/* Copos de nieve */
+.snowflake {
+    position: fixed;
+    top: -10px;
+    color: white;
+    opacity: 0.9;
+    font-size: 12px;
+    user-select: none;
+    pointer-events: none;
+    animation-name: fall;
+    animation-timing-function: linear;
+}
+
+@keyframes fall {
+    0% { transform: translateY(-10px) translateX(0); opacity: 1; }
+    100% { transform: translateY(110vh) translateX(25px); opacity: 0; }
+}
 </style>
 </head>
+
 <body>
 
-<h1>🎄 Calendario de AdvientAnita 🎁</h1>
+<header>
+  <h1>Calendario de Adviento</h1>
+  <p class="lead">Abre la puerta del día. 🎄✨</p>
+</header>
 
-<div class="calendar" id="calendar"></div>
+<section class="grid" id="grid"></section>
 
 <!-- Modal -->
-<div class="modal-bg" id="modalBg">
-    <div class="modal" id="modal">
-        <h2 id="modalTitle"></h2>
-        <p id="modalPhrase"></p>
-        <img id="giftImage" class="gift-img" style="display:none;"
-             src="https://cdn-icons-png.flaticon.com/512/1139/1139982.png" />
-        <div id="playerContainer"></div>
-        <button class="close-btn" onclick="closeModal()">Cerrar</button>
+<div id="overlay" class="overlay">
+  <div class="modal">
+    <div style="flex:1;">
+      <h2 id="modalTitle"></h2>
+      <p id="modalText"></p>
+      <div id="modalAudio"></div>
+      <button class="close" id="closeBtn">Cerrar</button>
     </div>
+    <div id="modalGift" style="width:200px;"></div>
+  </div>
 </div>
 
 <script>
-// Días con regalo
-const giftDays = [9, 15, 18];
+/* ===== FRASES ===== */
+const frases = [
+  "Que el espíritu navideño encienda tu sonrisa y tu esperanza.",
+  "Pequeños gestos, grandes alegrías.",
+  "Que la magia de diciembre te recuerde lo valiente que eres.",
+  "Regala tiempo: las mejores memorias no se envuelven.",
+  "Calma y abrazos: hoy es un buen día.",
+  "Hoy recuerda: mereces alegría.",
+  "Que la noche traiga paz y la mañana nuevas oportunidades.",
+  "Ríe de lo simple y celebra lo inesperado.",
+  "Abre tu corazón: la generosidad regresa.",
+  "Una vela, un deseo.",
+  "Pequeños pasos construyen grandes historias.",
+  "Hoy alguien piensa en ti.",
+  "Que la música y la risa llenen tu día.",
+  "Recuerda descansar: también es un regalo.",
+  "Una sonrisa puede cambiarlo todo.",
+  "Atrévete a soñar.",
+  "Haz una pausa y agradece.",
+  "La bondad es contagiosa.",
+  "Abraza el presente.",
+  "Siembra una idea amable.",
+  "Que la esperanza te acompañe.",
+  "Cree en lo pequeño.",
+  "La ternura construye puentes.",
+  "Celebra lo que importa.",
+  "Último empujón del mes: ¡ánimo!"
+];
 
-// Frases motivadoras
-const phrases = {
-    1: "Que diciembre llene tu corazón de luz.",
-    2: "Hoy es un buen día para sonreír.",
-    3: "La magia de la Navidad comienza en tu interior.",
-    4: "Un pequeño gesto puede cambiar un día entero.",
-    5: "Hoy mereces un abrazo navideño.",
-    6: "Cada día trae un nuevo motivo para celebrar.",
-    7: "Tus sueños también brillan en Navidad.",
-    8: "Regala paz, recibe amor.",
-    9: "Hoy será un gran día.",
-    10: "La alegría se comparte.",
-    11: "Eres luz para alguien más.",
-    12: "La Navidad también eres tú.",
-    13: "Sonríe, vas muy bien.",
-    14: "Hoy es perfecto para empezar algo nuevo.",
-    15: "Que tu hogar se llene de calidez.",
-    16: "Nunca es tarde para intentar de nuevo.",
-    17: "Respira… todo va a estar bien.",
-    18: "La esperanza es un regalo diario.",
-    19: "Tú haces la diferencia.",
-    20: "Hoy hay algo especial esperándote.",
-    21: "La magia está en los detalles.",
-    22: "El amor siempre vuelve.",
-    23: "Estás cerca de algo maravilloso.",
-    24: "La Nochebuena te abraza.",
-    25: "¡Feliz Navidad!"
+/* ===== REGALOS ===== */
+const diasConRegalo = new Set([10, 15, 18]);
+
+const giftIcon = `
+<img src="https://cdn-icons-png.flaticon.com/512/1139/1139982.png"
+     alt="regalo" width="120" style="filter: drop-shadow(0 0 4px white);">
+`;
+
+/* ===== CANCIONES ===== */
+const canciones = {
+  1:"https://open.spotify.com/embed/track/3QiAAp20rPC3dcAtKtMaqQ",
+  2:"https://open.spotify.com/embed/track/4fzyvSu73BhGvi96p2zwjL",
+  3:"https://open.spotify.com/embed/track/1yxcKrEcxt4O03IIC25yHk",
+  4:"https://open.spotify.com/embed/track/7fUYUcWy853HS8YJn0b3Sr",
+  5:"https://open.spotify.com/embed/track/7juPV71vBY8V28CVWVh9RE",
+  6:"https://open.spotify.com/embed/track/6syO6UTl8QiiWADJy3Uy2d",
+  7:"https://open.spotify.com/embed/track/0IrKbfhVKW0xpPEzRDeSUb",
+  8:"https://open.spotify.com/embed/track/34zJEmGCjFQTV9SKG4nX2e",
+  9:"https://open.spotify.com/embed/track/2EjXfH91m7f8HiJN1yQg97",
+  10:"https://open.spotify.com/embed/track/7uoFMmxln0GPXQ0AcCBXRq",
+  11:"https://open.spotify.com/embed/track/34HnsDct5xX1vfcz3LaQQs",
+  12:"https://open.spotify.com/embed/track/1ZKuSGOgsXAaG5h9kboNwH",
+  13:"https://open.spotify.com/embed/track/65irrLqfCMRiO3p87P4C0D",
+  14:"https://open.spotify.com/embed/track/5hslUAKq9I9CG2bAulFkHN",
+  15:"https://open.spotify.com/embed/track/3YZE5qDV7u1ZD1gZc47ZeR",
+  16:"https://open.spotify.com/embed/track/1TQGYhufxXY1YiYjI3gdSd",
+  17:"https://open.spotify.com/embed/track/2FRnf9qhLbvw8fu4IBXx78",
+  18:"https://open.spotify.com/embed/track/0bYg9bo50gSsH3LtXe2SQn",
+  19:"https://open.spotify.com/embed/track/5hslUAKq9I9CG2bAulFkHN",
+  20:"https://open.spotify.com/embed/track/6rqn19AqjcM5wgI1hCYciJ",
+  21:"https://open.spotify.com/embed/track/2QpN1ZVw8eJO5f7WcvUA1k",
+  22:"https://open.spotify.com/embed/track/2FRnf9qhLbvw8fu4IBXx78",
+  23:"https://open.spotify.com/embed/track/4KV9bM7a1KDc7b7OakFZic",
+  24:"https://open.spotify.com/embed/track/0OlwVgiXo2qkwAI84wmTLj",
+  25:"https://open.spotify.com/embed/track/0mSH3qaoRskcre3noTXbcB"
 };
 
-// Canciones (convertidas a embed)
-const songs = {
-    1: "3QiAAp20rPC3dcAtKtMaqQ",
-    2: "4fzyvSu73BhGvi96p2zwjL",
-    3: "1yxcKrEcxt4O03IIC25yHk",
-    4: "7fUYUcWy853HS8YJn0b3Sr",
-    5: "7juPV71vBY8V28CVWVh9RE",
-    6: "6syO6UTl8QiiWADJy3Uy2d",
-    7: "0IrKbfhVKW0xpPEzRDeSUb",
-    8: "34zJEmGCjFQTV9SKG4nX2e",
-    9: "2EjXfH91m7f8HiJN1yQg97",
-    10: "7uoFMmxln0GPXQ0AcCBXRq",
-    11: "34HnsDct5xX1vfcz3LaQQs",
-    12: "1ZKuSGOgsXAaG5h9kboNwH",
-    13: "65irrLqfCMRiO3p87P4C0D",
-    14: "5hslUAKq9I9CG2bAulFkHN",
-    15: "3YZE5qDV7u1ZD1gZc47ZeR",
-    16: "1TQGYhufxXY1YiYjI3gdSd",
-    17: "2FRnf9qhLbvw8fu4IBXx78",
-    18: "0bYg9bo50gSsH3LtXe2SQn",
-    19: "5hslUAKq9I9CG2bAulFkHN",
-    20: "6rqn19AqjcM5wgI1hCYciJ",
-    21: "2QpN1ZVw8eJO5f7WcvUA1k",
-    22: "2FRnf9qhLbvw8fu4IBXx78",
-    23: "4KV9bM7a1KDc7b7OakFZic",
-    24: "0OlwVgiXo2qkwAI84wmTLj",
-    25: "0mSH3qaoRskcre3noTXbcB"
-};
 
-const today = new Date().getDate();
+/* ===== FECHA ===== */
+const hoy = new Date();
+const mes = hoy.getMonth() + 1;
+const dia = hoy.getDate();
 
-// Crear calendario
-const calendar = document.getElementById("calendar");
+const grid = document.getElementById("grid");
 
+/* ===== CREAR LOS 25 DÍAS ===== */
 for (let i = 1; i <= 25; i++) {
-    const div = document.createElement("div");
-    div.className = "day";
-    div.textContent = i;
+    const d = document.createElement("div");
+    d.className = "day";
+    d.dataset.day = i;
 
-    if (i > today) div.classList.add("locked");
-
-    div.onclick = () => { if (i <= today) openDay(i); };
-    calendar.appendChild(div);
-}
-
-// Abrir modal
-function openDay(n) {
-    document.getElementById("modalTitle").textContent = "Día " + n;
-    document.getElementById("modalPhrase").textContent = phrases[n];
-
-    // Regalo
-    const gift = document.getElementById("giftImage");
-    gift.style.display = giftDays.includes(n) ? "block" : "none";
-
-    // Canción
-    const player = document.getElementById("playerContainer");
-    player.innerHTML = `
-        <iframe style="border-radius:12px;margin-top:15px;"
-                src="https://open.spotify.com/embed/track/${songs[n]}"
-                width="100%" height="152" frameborder="0"
-                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture">
-        </iframe>
+    d.innerHTML = `
+        <div class="num">${i}</div>
+        <div class="label">${i === 1 ? "Inicio" : (i === 25 ? "Final" : "Día " + i)}</div>
     `;
 
-    document.getElementById("modalBg").style.display = "flex";
+    if (!(mes === 12 && i <= dia)) {
+        d.classList.add("locked");
+    }
+
+    grid.appendChild(d);
 }
 
-function closeModal() {
-    document.getElementById("modalBg").style.display = "none";
-}
+/* ===== MODAL ===== */
+const overlay = document.getElementById("overlay");
+const modalTitle = document.getElementById("modalTitle");
+const modalText = document.getElementById("modalText");
+const modalGift = document.getElementById("modalGift");
+const modalAudio = document.getElementById("modalAudio");
+const closeBtn = document.getElementById("closeBtn");
 
-// Copos de nieve
-function createSnowflake() {
-    const snow = document.createElement("div");
-    snow.className = "snowflake";
-    snow.textContent = "❄";
-    snow.style.left = Math.random() * 100 + "vw";
-    snow.style.fontSize = (Math.random() * 10 + 10) + "px";
-    snow.style.animationDuration = (Math.random() * 4 + 6) + "s";
-    document.body.appendChild(snow);
-    setTimeout(() => snow.remove(), 10000);
-}
-setInterval(createSnowflake, 150);
+grid.addEventListener("click", ev => {
+    const box = ev.target.closest(".day");
+    if (!box) return;
 
+    const day = Number(box.dataset.day);
+
+    if (!(mes === 12 && day <= dia)) {
+        alert("Ese día aún no se puede abrir.");
+        return;
+    }
+
+    modalTitle.textContent = "Día " + day;
+    modalText.textContent = frases[day - 1];
+
+    /* Canción */
+    modalAudio.innerHTML = `
+        <iframe style="border-radius:12px" src="${canciones[day]}"
+        width="100%" height="152" frameborder="0" allow="autoplay; clipboard-write; encrypted-media"
+        loading="lazy"></iframe>
+    `;
+
+    /* Regalo */
+    modalGift.innerHTML = diasConRegalo.has(day) ? giftIcon : "";
+
+    overlay.classList.add("show");
+});
+
+closeBtn.onclick = () => overlay.classList.remove("show");
+overlay.onclick = e => { if (e.target === overlay) overlay.classList.remove("show"); };
+
+/* ===== NIEVE ===== */
+function crearCopo() {
+    const c = document.createElement("div");
+    c.className = "snowflake";
+    c.textContent = "❄";
+    c.style.left = Math.random()*100 + "vw";
+    c.style.fontSize = (10 + Math.random()*12) + "px";
+    c.style.animationDuration = (6 + Math.random()*8) + "s";
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 9000);
+}
+setInterval(crearCopo, 180);
 </script>
 
 </body>
