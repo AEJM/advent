@@ -1,190 +1,147 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Calendario de Adviento</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Calendario de AdvientAnita</title>
+
+<!-- Google Font: Mountains of Christmas -->
+<link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@700&display=swap" rel="stylesheet">
 
 <style>
-:root {
-    --bg: #9b0505;
-    --card: rgba(255,255,255,0.15);
-    --text: #ffffff;
-    --white: #ffffff;
+:root{
+  --bg:#9b0505;
+  --text:#fff;
+  --card:rgba(255,255,255,0.18);
+  --modal-bg: rgba(255,255,255,0.60); /* 60% transparencia */
 }
 
-/* Reset */
-* { box-sizing: border-box; }
+*{ box-sizing:border-box; }
 
-body {
-    margin: 0;
-    font-family: "Segoe UI", Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    padding: 20px;
-    min-height: 100vh;
-    overflow-x: hidden;
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family: "Mountains of Christmas", cursive;
+  padding:20px;
+  min-height:100vh;
+  overflow-x:hidden;
 }
 
-header {
-    text-align: center;
-    margin-bottom: 20px;
+/* Header */
+header{ text-align:center; margin-bottom:18px; }
+h1{
+  font-size:60px;
+  margin:0;
+  text-shadow:0 0 12px rgba(0,0,0,0.45);
+  line-height:1;
 }
 
-h1 {
-    margin: 0;
-    font-size: 28px;
+/* Grid base */
+.grid{
+  display:grid;
+  gap:10px;
+  width:100%;
+  margin-top:18px;
 }
 
-p.lead {
-    margin: 0;
-    opacity: 0.9;
+/* Layout breakpoints to make all 25 blocks fit vertically on wide screens */
+@media (min-width: 1400px){
+  .grid{ grid-template-columns: repeat(5,1fr); max-width:1200px; margin:18px auto; }
+}
+@media (min-width: 1000px) and (max-width:1399px){
+  .grid{ grid-template-columns: repeat(5,1fr); max-width:1000px; margin:18px auto; }
+}
+@media (min-width: 700px) and (max-width:999px){
+  .grid{ grid-template-columns: repeat(4,1fr); max-width:900px; margin:18px auto; }
+}
+@media (max-width:699px){
+  .grid{ grid-template-columns: repeat(3,1fr); max-width:720px; margin:8px auto; }
+}
+@media (max-width:460px){
+  .grid{ grid-template-columns: repeat(2,1fr); max-width:420px; margin:8px auto; }
 }
 
-/* ===== GRID RESPONSIVA ===== */
-.grid {
-    display: grid;
-    gap: 14px;
-    margin-top: 20px;
+/* Day squares */
+.day{
+  background:var(--card);
+  border:2px solid rgba(255,255,255,0.55);
+  color:white;
+  cursor:pointer;
+  border-radius:12px;
+  aspect-ratio:1 / 1;  /* cuadrado perfecto */
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size: clamp(22px, 4vw, 48px); /* número grande y responsive */
+  text-shadow:0 0 8px rgba(0,0,0,0.4);
+  backdrop-filter:blur(4px);
+  position:relative;
+  transition: transform .15s ease, box-shadow .15s ease;
+  user-select:none;
 }
 
-/* Pantalla grande */
-@media (min-width: 901px) {
-    .grid {
-        grid-template-columns: repeat(5, 1fr);
-    }
+/* make squares shorter on desktop so 25 fit vertically */
+@media (min-width:1000px){
+  .day{ font-size: 36px; }
+  /* reduce vertical size by adjusting grid auto-rows via aspect-ratio and width: for wide screens, we can reduce the max container width */
+  .grid{ max-width:1100px; }
 }
 
-/* Tablet horizontal / vertical */
-@media (max-width: 900px) and (min-width: 601px) {
-    .grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
+.day:hover:not(.locked){ transform:translateY(-6px); box-shadow:0 12px 22px rgba(0,0,0,0.3); }
+.locked{ opacity:0.42; cursor:not-allowed; transform:none !important; }
+
+/* Gift marker */
+.gift-marker{ position:absolute; top:8px; right:8px; font-size:20px; }
+
+/* Modal overlay */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s ease;
+  z-index:40;
+}
+.overlay.show{ opacity:1; pointer-events:auto; }
+
+/* Modal box */
+.modal{
+  width:min(92%,760px);
+  background: var(--modal-bg);
+  backdrop-filter: blur(8px);
+  color:#1b1b1b;
+  border-radius:18px;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  align-items:center;
 }
 
-/* Celular vertical */
-@media (max-width: 600px) {
-    .grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-    }
+/* Modal content */
+.modal h2{ margin:0; font-size:34px; color:#9b0505; font-family:"Mountains of Christmas"; }
+.modal p{ margin:0; font-size:18px; text-align:center; color:#222; }
+
+/* Player container (iframe will go here) */
+#playerContainer{ width:100%; display:flex; justify-content:center; margin-top:6px; }
+
+/* Gift area */
+#modalGift{ width:100%; display:flex; justify-content:center; margin-top:6px; }
+
+/* Close button */
+.close{
+  background:#9b0505; color:white; border:none; padding:10px 18px; border-radius:12px; cursor:pointer;
+  font-family:"Mountains of Christmas"; font-size:18px;
 }
 
-/* Cada día (cuadrado perfecto) */
-.day {
-    background: var(--card);
-    border: 1px solid rgba(255,255,255,0.25);
-    border-radius: 14px;
-    aspect-ratio: 1/1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    transition: .15s;
-    backdrop-filter: blur(4px);
-    padding: 6px;
-}
-
-/* Tamaños adaptados */
-.day .num {
-    font-size: clamp(20px, 5vw, 32px);
-    font-weight: 700;
-    text-shadow: 0 0 8px rgba(255,255,255,0.6);
-}
-
-.day .label {
-    font-size: clamp(11px, 2.5vw, 14px);
-    opacity: 0.9;
-    margin-top: 4px;
-}
-
-.day:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-}
-
-.day.locked {
-    opacity: 0.55;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-/* ===== MODAL ===== */
-.overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: .25s;
-    z-index: 20;
-}
-
-.overlay.show {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.modal {
-    width: min(720px, 90%);
-    background: rgba(255,255,255,0.8); /* 80% transparencia */
-    color: #222;
-    border-radius: 16px;
-    padding: 22px;
-    display: flex;
-    flex-direction: row;
-    gap: 18px;
-}
-
-/* Modal responsivo */
-@media (max-width: 700px) {
-    .modal {
-        flex-direction: column;
-    }
-}
-
-.modal h2 {
-    margin: 0 0 8px 0;
-    color: #9b0505;
-}
-
-.close {
-    background: #9b0505;
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-#modalGift {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Copos de nieve */
-.snowflake {
-    position: fixed;
-    top: -10px;
-    color: white;
-    opacity: 0.9;
-    font-size: 12px;
-    user-select: none;
-    pointer-events: none;
-    animation-name: fall;
-    animation-timing-function: linear;
-}
-
-@keyframes fall {
-    0% { transform: translateY(-10px) translateX(0); opacity: 1; }
-    100% { transform: translateY(110vh) translateX(25px); opacity: 0; }
-}
+/* Snow */
+.snowflake{ position:fixed; top:-10px; color:white; opacity:0.9; font-size:12px; user-select:none; pointer-events:none; animation:fall linear forwards; }
+@keyframes fall{ 0%{ transform:translateY(-10px) translateX(0); opacity:1; } 100%{ transform:translateY(110vh) translateX(20px); opacity:0; } }
 </style>
 </head>
 
@@ -192,26 +149,26 @@ p.lead {
 
 <header>
   <h1>Calendario de AdvientAnita</h1>
-  <p class="lead">Abre la puerta del día. 🎄✨</p>
 </header>
 
-<section class="grid" id="grid"></section>
+<section class="grid" id="grid" aria-label="Calendario de Adviento"></section>
 
 <!-- Modal -->
-<div id="overlay" class="overlay">
-  <div class="modal">
-    <div style="flex:1;">
-      <h2 id="modalTitle"></h2>
-      <p id="modalText"></p>
-      <div id="modalAudio"></div>
-      <button class="close" id="closeBtn">Cerrar</button>
-    </div>
-    <div id="modalGift" style="width:200px;"></div>
+<div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal" role="document">
+    <h2 id="modalTitle">Día</h2>
+    <p id="modalText">Texto motivador</p>
+
+    <div id="modalGift" aria-hidden="true"></div>
+
+    <div id="playerContainer" aria-hidden="true"></div>
+
+    <button id="closeBtn" class="close">Cerrar</button>
   </div>
 </div>
 
 <script>
-/* ===== FRASES ===== */
+/* ====== Datos ====== */
 const frases = [
   "Que el espíritu navideño encienda tu sonrisa y tu esperanza.",
   "Pequeños gestos, grandes alegrías.",
@@ -240,120 +197,148 @@ const frases = [
   "Último empujón del mes: ¡ánimo!"
 ];
 
-/* ===== REGALOS ===== */
-const diasConRegalo = new Set([10, 15, 18]);
+/* Días con regalo */
+const diasConRegalo = new Set([9,15,18]);
 
-const giftIcon = `
-<img src="https://cdn-icons-png.flaticon.com/512/1139/1139982.png"
-     alt="regalo" width="120" style="filter: drop-shadow(0 0 4px white);">
-`;
-
-/* ===== CANCIONES ===== */
-const canciones = {
-  1:"https://open.spotify.com/embed/track/3QiAAp20rPC3dcAtKtMaqQ",
-  2:"https://open.spotify.com/embed/track/4fzyvSu73BhGvi96p2zwjL",
-  3:"https://open.spotify.com/embed/track/1yxcKrEcxt4O03IIC25yHk",
-  4:"https://open.spotify.com/embed/track/7fUYUcWy853HS8YJn0b3Sr",
-  5:"https://open.spotify.com/embed/track/7juPV71vBY8V28CVWVh9RE",
-  6:"https://open.spotify.com/embed/track/6syO6UTl8QiiWADJy3Uy2d",
-  7:"https://open.spotify.com/embed/track/0IrKbfhVKW0xpPEzRDeSUb",
-  8:"https://open.spotify.com/embed/track/34zJEmGCjFQTV9SKG4nX2e",
-  9:"https://open.spotify.com/embed/track/2EjXfH91m7f8HiJN1yQg97",
-  10:"https://open.spotify.com/embed/track/7uoFMmxln0GPXQ0AcCBXRq",
-  11:"https://open.spotify.com/embed/track/34HnsDct5xX1vfcz3LaQQs",
-  12:"https://open.spotify.com/embed/track/1ZKuSGOgsXAaG5h9kboNwH",
-  13:"https://open.spotify.com/embed/track/65irrLqfCMRiO3p87P4C0D",
-  14:"https://open.spotify.com/embed/track/5hslUAKq9I9CG2bAulFkHN",
-  15:"https://open.spotify.com/embed/track/3YZE5qDV7u1ZD1gZc47ZeR",
-  16:"https://open.spotify.com/embed/track/1TQGYhufxXY1YiYjI3gdSd",
-  17:"https://open.spotify.com/embed/track/2FRnf9qhLbvw8fu4IBXx78",
-  18:"https://open.spotify.com/embed/track/0bYg9bo50gSsH3LtXe2SQn",
-  19:"https://open.spotify.com/embed/track/5hslUAKq9I9CG2bAulFkHN",
-  20:"https://open.spotify.com/embed/track/6rqn19AqjcM5wgI1hCYciJ",
-  21:"https://open.spotify.com/embed/track/2QpN1ZVw8eJO5f7WcvUA1k",
-  22:"https://open.spotify.com/embed/track/2FRnf9qhLbvw8fu4IBXx78",
-  23:"https://open.spotify.com/embed/track/4KV9bM7a1KDc7b7OakFZic",
-  24:"https://open.spotify.com/embed/track/0OlwVgiXo2qkwAI84wmTLj",
-  25:"https://open.spotify.com/embed/track/0mSH3qaoRskcre3noTXbcB"
+/* Canciones — usar embed base */
+const embedBase = "https://open.spotify.com/embed/track/";
+const trackIds = {
+  1:"3QiAAp20rPC3dcAtKtMaqQ",
+  2:"4fzyvSu73BhGvi96p2zwjL",
+  3:"1yxcKrEcxt4O03IIC25yHk",
+  4:"7fUYUcWy853HS8YJn0b3Sr",
+  5:"7juPV71vBY8V28CVWVh9RE",
+  6:"6syO6UTl8QiiWADJy3Uy2d",
+  7:"0IrKbfhVKW0xpPEzRDeSUb",
+  8:"34zJEmGCjFQTV9SKG4nX2e",
+  9:"2EjXfH91m7f8HiJN1yQg97",
+  10:"7uoFMmxln0GPXQ0AcCBXRq",
+  11:"34HnsDct5xX1vfcz3LaQQs",
+  12:"1ZKuSGOgsXAaG5h9kboNwH",
+  13:"65irrLqfCMRiO3p87P4C0D",
+  14:"5hslUAKq9I9CG2bAulFkHN",
+  15:"3YZE5qDV7u1ZD1gZc47ZeR",
+  16:"1TQGYhufxXY1YiYjI3gdSd",
+  17:"2FRnf9qhLbvw8fu4IBXx78",
+  18:"0bYg9bo50gSsH3LtXe2SQn",
+  19:"5hslUAKq9I9CG2bAulFkHN",
+  20:"6rqn19AqjcM5wgI1hCYciJ",
+  21:"2QpN1ZVw8eJO5f7WcvUA1k",
+  22:"2FRnf9qhLbvw8fu4IBXx78",
+  23:"4KV9bM7a1KDc7b7OakFZic",
+  24:"0OlwVgiXo2qkwAI84wmTLj",
+  25:"0mSH3qaoRskcre3noTXbcB"
 };
 
+/* Fecha */
+const now = new Date();
+const isDecember = (now.getMonth()+1) === 12;
+const today = now.getDate();
 
-/* ===== FECHA ===== */
-const hoy = new Date();
-const mes = hoy.getMonth() + 1;
-const dia = hoy.getDate();
+/* Grid build */
+const grid = document.getElementById('grid');
+for(let i=1;i<=25;i++){
+  const cell = document.createElement('div');
+  cell.className = 'day';
+  cell.dataset.day = i;
+  cell.textContent = i;
 
-const grid = document.getElementById("grid");
+  // gift marker
+  if(diasConRegalo.has(i)){
+    const marker = document.createElement('div');
+    marker.className = 'gift-marker';
+    marker.textContent = '🎁';
+    cell.appendChild(marker);
+  }
 
-/* ===== CREAR LOS 25 DÍAS ===== */
-for (let i = 1; i <= 25; i++) {
-    const d = document.createElement("div");
-    d.className = "day";
-    d.dataset.day = i;
+  // lock future days (only if december)
+  if(!(isDecember && i <= today)){
+    cell.classList.add('locked');
+  }
 
-    d.innerHTML = `
-        <div class="num">${i}</div>
-        <div class="label">${i === 1 ? "Inicio" : (i === 25 ? "Final" : "Día " + i)}</div>
-    `;
-
-    if (!(mes === 12 && i <= dia)) {
-        d.classList.add("locked");
-    }
-
-    grid.appendChild(d);
+  grid.appendChild(cell);
 }
 
-/* ===== MODAL ===== */
-const overlay = document.getElementById("overlay");
-const modalTitle = document.getElementById("modalTitle");
-const modalText = document.getElementById("modalText");
-const modalGift = document.getElementById("modalGift");
-const modalAudio = document.getElementById("modalAudio");
-const closeBtn = document.getElementById("closeBtn");
+/* Modal refs */
+const overlay = document.getElementById('overlay');
+const modalTitle = document.getElementById('modalTitle');
+const modalText = document.getElementById('modalText');
+const modalGift = document.getElementById('modalGift');
+const playerContainer = document.getElementById('playerContainer');
+const closeBtn = document.getElementById('closeBtn');
 
-grid.addEventListener("click", ev => {
-    const box = ev.target.closest(".day");
-    if (!box) return;
+/* Helper to stop/remove iframe player */
+function removePlayer(){
+  playerContainer.innerHTML = '';
+  playerContainer.setAttribute('aria-hidden','true');
+}
 
-    const day = Number(box.dataset.day);
+/* Open handler */
+grid.addEventListener('click', (e) => {
+  const tile = e.target.closest('.day');
+  if(!tile) return;
+  const d = Number(tile.dataset.day);
 
-    if (!(mes === 12 && day <= dia)) {
-        alert("Ese día aún no se puede abrir.");
-        return;
-    }
+  if(tile.classList.contains('locked')){
+    alert('Ese día aún no se puede abrir.');
+    return;
+  }
 
-    modalTitle.textContent = "Día " + day;
-    modalText.textContent = frases[day - 1];
+  modalTitle.textContent = 'Día ' + d;
+  modalText.textContent = frases[d-1] || '';
 
-    /* Canción */
-    modalAudio.innerHTML = `
-        <iframe style="border-radius:12px" src="${canciones[day]}"
-        width="100%" height="152" frameborder="0" allow="autoplay; clipboard-write; encrypted-media"
-        loading="lazy"></iframe>
-    `;
+  // gift
+  if(diasConRegalo.has(d)){
+    modalGift.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/1139/1139982.png" alt="regalo" width="140" style="filter: drop-shadow(0 6px 10px rgba(0,0,0,0.25)); border-radius:8px;">`;
+    modalGift.setAttribute('aria-hidden','false');
+  } else {
+    modalGift.innerHTML = '';
+    modalGift.setAttribute('aria-hidden','true');
+  }
 
-    /* Regalo */
-    modalGift.innerHTML = diasConRegalo.has(day) ? giftIcon : "";
+  // player: insert spotify embed iframe if we have an id
+  removePlayer();
+  const id = trackIds[d];
+  if(id){
+    const iframe = document.createElement('iframe');
+    iframe.src = embedBase + encodeURIComponent(id);
+    iframe.width = '100%';
+    iframe.height = '152';
+    iframe.frameBorder = '0';
+    iframe.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
+    iframe.style.borderRadius = '12px';
+    iframe.loading = 'lazy';
+    playerContainer.appendChild(iframe);
+    playerContainer.setAttribute('aria-hidden','false');
+  }
 
-    overlay.classList.add("show");
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden','false');
 });
 
-closeBtn.onclick = () => overlay.classList.remove("show");
-overlay.onclick = e => { if (e.target === overlay) overlay.classList.remove("show"); };
-
-/* ===== NIEVE ===== */
-function crearCopo() {
-    const c = document.createElement("div");
-    c.className = "snowflake";
-    c.textContent = "❄";
-    c.style.left = Math.random()*100 + "vw";
-    c.style.fontSize = (10 + Math.random()*12) + "px";
-    c.style.animationDuration = (6 + Math.random()*8) + "s";
-    document.body.appendChild(c);
-    setTimeout(() => c.remove(), 9000);
+/* Close modal: also remove player to stop playback */
+function closeModal(){
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden','true');
+  removePlayer();
 }
-setInterval(crearCopo, 180);
-</script>
+closeBtn.addEventListener('click', closeModal);
+overlay.addEventListener('click', (ev) => { if(ev.target === overlay) closeModal(); });
+document.addEventListener('keydown', (ev) => { if(ev.key === 'Escape' && overlay.classList.contains('show')) closeModal(); });
 
+/* Snow */
+function spawnSnow(){
+  const s = document.createElement('div');
+  s.className = 'snowflake';
+  s.textContent = '❄';
+  s.style.left = Math.random()*100 + 'vw';
+  s.style.fontSize = (10 + Math.random()*14) + 'px';
+  s.style.animationDuration = (6 + Math.random()*7) + 's';
+  document.body.appendChild(s);
+  setTimeout(()=> s.remove(), 10000);
+}
+setInterval(spawnSnow, 180);
+
+</script>
 </body>
 </html>
