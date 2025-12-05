@@ -73,7 +73,7 @@ h1{
   display:flex;
   justify-content:center;
   align-items:center;
-  font-size: clamp(22px, 4vw, 48px); /* número grande y responsive */
+  font-size: clamp(22px, 4vw, 48px);
   text-shadow:0 0 8px rgba(0,0,0,0.4);
   backdrop-filter:blur(4px);
   position:relative;
@@ -81,18 +81,13 @@ h1{
   user-select:none;
 }
 
-/* make squares shorter on desktop so 25 fit vertically */
 @media (min-width:1000px){
   .day{ font-size: 36px; }
-  /* reduce vertical size by adjusting grid auto-rows via aspect-ratio and width: for wide screens, we can reduce the max container width */
   .grid{ max-width:1100px; }
 }
 
 .day:hover:not(.locked){ transform:translateY(-6px); box-shadow:0 12px 22px rgba(0,0,0,0.3); }
 .locked{ opacity:0.42; cursor:not-allowed; transform:none !important; }
-
-/* Gift marker */
-.gift-marker{ position:absolute; top:8px; right:8px; font-size:20px; }
 
 /* Modal overlay */
 .overlay{
@@ -127,7 +122,7 @@ h1{
 .modal h2{ margin:0; font-size:34px; color:#9b0505; font-family:"Mountains of Christmas"; }
 .modal p{ margin:0; font-size:18px; text-align:center; color:#222; }
 
-/* Player container (iframe will go here) */
+/* Player container */
 #playerContainer{ width:100%; display:flex; justify-content:center; margin-top:6px; }
 
 /* Gift area */
@@ -243,15 +238,9 @@ for(let i=1;i<=25;i++){
   cell.dataset.day = i;
   cell.textContent = i;
 
-  // gift marker
-  if(diasConRegalo.has(i)){
-    const marker = document.createElement('div');
-    marker.className = 'gift-marker';
-    marker.textContent = '🎁';
-    cell.appendChild(marker);
-  }
+  // ❌ Eliminado: Ya no se muestra el regalo en la vista principal
 
-  // lock future days (only if december)
+  // lock future days
   if(!(isDecember && i <= today)){
     cell.classList.add('locked');
   }
@@ -287,7 +276,7 @@ grid.addEventListener('click', (e) => {
   modalTitle.textContent = 'Día ' + d;
   modalText.textContent = frases[d-1] || '';
 
-  // gift
+  // gift in modal
   if(diasConRegalo.has(d)){
     modalGift.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/1139/1139982.png" alt="regalo" width="140" style="filter: drop-shadow(0 6px 10px rgba(0,0,0,0.25)); border-radius:8px;">`;
     modalGift.setAttribute('aria-hidden','false');
@@ -296,7 +285,7 @@ grid.addEventListener('click', (e) => {
     modalGift.setAttribute('aria-hidden','true');
   }
 
-  // player: insert spotify embed iframe if we have an id
+  // player
   removePlayer();
   const id = trackIds[d];
   if(id){
@@ -316,7 +305,7 @@ grid.addEventListener('click', (e) => {
   overlay.setAttribute('aria-hidden','false');
 });
 
-/* Close modal: also remove player to stop playback */
+/* Close modal */
 function closeModal(){
   overlay.classList.remove('show');
   overlay.setAttribute('aria-hidden','true');
